@@ -15,8 +15,7 @@ def season(number_month):
         result = value
         break
     if not len(result):
-        print('There is no such season!')
-    else:
-        print(result)
+        result = 'There is no such season!'
+    return result
 
-season(int(input('Enter the month number: ')))
+print(season(int(input('Enter the month number: '))))
