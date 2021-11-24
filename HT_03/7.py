@@ -12,7 +12,7 @@ def calculate(number_1, number_2, operation):
     elif operation == '*':
         print('{} * {} = '.format(number_1, number_2))
         print(number_1 * number_2)
-    elif operation == '/':
+    elif operation == '/' and number_2 != 0:
         print('{} / {} = '.format(number_1, number_2))
         print(number_1 / number_2)
     else:
