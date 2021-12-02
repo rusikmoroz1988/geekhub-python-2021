@@ -16,18 +16,9 @@
 #    .......
 
 def generator(iterable):
-    saved = []
-    for element in iterable:
-        yield element
-        saved.append(element)
-    step = 1    
-    while saved:
-        for element in saved:
-              yield element
-              if step==len(saved):
-                  gen_iterator = generator(iterable)
-                  next(gen_iterator)
-              step+=1  
-                
+    while True:
+        for step in iterable:
+            yield step
+
 for elem in generator([1,2,3]):
     print(elem)
