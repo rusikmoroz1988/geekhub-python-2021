@@ -40,7 +40,7 @@ def start():
                 print(bm.get_balance(username))
             elif choice_menu == '2' or choice_menu == '3':
                 summ = eval(input("Enter money amount: "))
-                if not (bm.balance_change(username, summ, choice_menu)):
+                if summ <= 0 or not (bm.balance_change(username, summ, choice_menu)):
                     print("Operation failed!")
                     continue
                 if choice_menu == '2':
