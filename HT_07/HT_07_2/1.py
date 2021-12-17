@@ -16,7 +16,7 @@ class СharacterСountMismatch(Exception):
 
 def get_symbols_from_file(file_name, number_of_characters):
         
-    with open(file_name, "r") as f:
+     with open(file_name, "r", encoding="utf-8") as f:
         text_from_file = f.read()
         list_symb = [item for item in text_from_file if item != '\n']
         
@@ -30,7 +30,9 @@ def get_symbols_from_file(file_name, number_of_characters):
         strt_idx = (len(list_symb) // 2) - (number_of_characters // 2)
         end_idx = (len(list_symb) // 2) + (number_of_characters // 2)
         result = list_symb[strt_idx: end_idx + 1]
+        if len(result) > number_of_characters:
+            result = list_symb[strt_idx: end_idx]
         
-        print(list_symb[:number_of_characters], result, list_symb[-number_of_characters-1:-1])
+        print(''.join(list_symb[:number_of_characters]), ''.join(result), ''.join(list_symb[-number_of_characters:]))
 
 get_symbols_from_file('test.txt', int(input("Enter the number of characters: ")))
