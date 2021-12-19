@@ -10,7 +10,6 @@ def user(ID):
                         'Enter 4 to exit : ')
          choice_menu = input(str_menu)
          if choice_menu == '1':
-             pass
              print(dbm.get_balance(ID))
          elif choice_menu == '2' or choice_menu == '3':
              summ = eval(input("Enter money amount: "))
@@ -89,4 +88,5 @@ def start():
         else:
             user(id_user)
     
+1
 start()

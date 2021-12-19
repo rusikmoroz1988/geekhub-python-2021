@@ -1,5 +1,9 @@
 import sqlite3
 
+class NoBanknotesError(Exception):
+    def __init__(self, text):
+        self.txt = text
+
 def create_database():
     connection = get_connection()
     cursor = connection.cursor()
@@ -106,30 +110,31 @@ def issued_banknotes(balance):
     
     list_counts = []
     last = 0
-    while balance > 0:    
-        for item in my_list:
-             count = item['count']
-             banknote = item['banknote']
-             if count == 0 or banknote == last:
-                  continue
-             cel = balance//banknote
-             if cel == 0:
-                  continue
-             else:
-                 if cel > count:
-                     balance -= count * banknote
-                     while count > 0:
-                         list_counts.append(banknote)
-                         count-=1                                    
-                 else:
-                     balance -= cel * banknote
-                     while cel > 0:
-                         list_counts.append(banknote) 
-                         cel-=1
+    if len(my_list) > 0:
+        while balance > 0:    
+            for item in my_list:
+                count = item['count']
+                banknote = item['banknote']
+                if count == 0 or banknote == last:
+                    continue
+                cel = balance//banknote
+                if cel == 0:
+                    continue
+                else:
+                    if cel > count:
+                        balance -= count * banknote
+                        while count > 0:
+                            list_counts.append(banknote)
+                            count-=1                                    
+                    else:
+                        balance -= cel * banknote
+                        while cel > 0:
+                            list_counts.append(banknote) 
+                            cel-=1
          
-        if balance>0 and len(list_counts)!=0:
-            last = list_counts.pop()
-            balance = last + balance
+            if balance>0 and len(list_counts)!=0:
+                last = list_counts.pop()
+                balance = last + balance
                 
     return list_counts
          
@@ -153,14 +158,24 @@ def delete_counts_from_banknote(list_counts, connection):
 def change_balance(ID, summa, operation):
     if summa%10!=0:
         return False
+    original_summa = summa
     connection = get_connection()
     cursor = connection.cursor()
     cursor.execute("SELECT balance FROM balances WHERE userid=?", (ID, )) 
     if operation=='3':
-       summa =- summa
+        list_counts = issued_banknotes(-summa)
+        if len(list_counts)!=0:
+            delete_counts_from_banknote(list_counts, connection)
+        else:
+            print("Not enough bills!")
+            connection.commit()
+            connection.close() 
+            return False
+        summa =- summa
+       
     try:
         balance   = cursor.fetchone()[0]
-        if balance < summa:
+        if operation=='3' and balance < original_summa:
             return False
         
         sql_update_query = """Update balances set balance = ? where userid = ?"""
@@ -170,11 +185,6 @@ def change_balance(ID, summa, operation):
             return False
         sql_update_query = """INSERT INTO balances VALUES (?, ?)"""
         cursor.execute(sql_update_query, (ID, summa)) 
-    
-    if operation=='3':
-        list_counts = issued_banknotes(-summa)
-        if len(list_counts)!=0:
-            delete_counts_from_banknote(list_counts, connection) 
     
     connection.commit()
     connection.close()
@@ -193,12 +203,13 @@ def show_banknotes():
     connection = get_connection()
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM banknotes")
-    try:
-        result = cursor.fetchall()
-        for item in result:
-            print(f'banknote: {item[0]} count: {item[1]}\n', end='')
-    except:
+    result = cursor.fetchall()
+    if len(result)==0:
         print('No banknotes!')
+    else:
+        for item in result:
+            print(f'banknote: {item[0]} count: {item[1]}\n', end='') 
+   
 
 def change_banknotes(list_banknot):
     connection = get_connection()
@@ -208,13 +219,19 @@ def change_banknotes(list_banknot):
        cursor.execute("SELECT count FROM banknotes WHERE banknote=?", (item['banknote'], ))
        try:
            count = cursor.fetchone()[0]
+           total = count + int(item['count'])
+           if total < 0:
+               raise NoBanknotesError("Not enough banknote ", item['banknote'])
+           
            sql_update_query = """Update banknotes set count = ? where banknote = ?"""
-           cursor.execute(sql_update_query, (count + int(item['count']), int(item['banknote'])))
+           cursor.execute(sql_update_query, (total, int(item['banknote'])))
+       except NoBanknotesError as nbe:
+           print(nbe)
        except:
            sql_update_query = """INSERT INTO banknotes VALUES (?, ?)"""
            cursor.execute(sql_update_query, (int(item['banknote']), int(item['count'])))
-       connection.commit()
-           
+    
+    connection.commit()          
     connection.close()
     
 
