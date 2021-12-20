@@ -102,5 +102,4 @@ def start():
         else:
             user(id_user)
     
-1
 start()
