@@ -163,7 +163,7 @@ def change_balance(ID, summa, operation):
     cursor = connection.cursor()
     cursor.execute("SELECT balance FROM balances WHERE userid=?", (ID, )) 
     if operation=='3':
-        list_counts = issued_banknotes(-summa)
+        list_counts = issued_banknotes(original_summa)
         if len(list_counts)!=0:
             delete_counts_from_banknote(list_counts, connection)
         else:
@@ -231,11 +231,7 @@ def change_banknotes(list_banknot):
            sql_update_query = """INSERT INTO banknotes VALUES (?, ?)"""
            cursor.execute(sql_update_query, (int(item['banknote']), int(item['count'])))
     
+    sql = 'DELETE FROM banknotes WHERE count=0'
+    cursor.execute(sql)
     connection.commit()          
-    connection.close()
-    
-
-    
-    
-    
-              
+    connection.close()       
