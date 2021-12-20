@@ -10,10 +10,15 @@ def do_request_PB(date, first_currency, second_currency):
     if len(exchangeRate)==0:
         return tuple()
     exchangeRate.pop(0)
-    first_course = list(filter(lambda item: item['currency'] == first_currency, exchangeRate));
-    second_course = list(filter(lambda item: item['currency'] == second_currency, exchangeRate));
-    return round(first_course[0]['purchaseRate'], 4), round(second_course[0]['saleRate'], 4)
+    first_course = list(filter(lambda item: item['currency'] == first_currency, exchangeRate))[0]
+    second_course = list(filter(lambda item: item['currency'] == second_currency, exchangeRate))[0]
+    
+    purchaseRate = saleRate = 0
+    purchaseRate = first_course['purchaseRate'] if 'purchaseRate' in first_course else first_course['purchaseRateNB']
+    saleRate = second_course['saleRate'] if 'saleRate' in second_course else second_course['saleRateNB']
 
+    return purchaseRate, saleRate
+        
 def currency_changes():
     currencies = ['USD', 'EUR', 'RUB', 'CHF', 'GBP', 'PLN', 'SEK', 'CAD']
     print('Available currencies:')
