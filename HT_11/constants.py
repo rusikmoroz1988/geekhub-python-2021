@@ -1,0 +1,7 @@
+__THE_PATH__ = 'https://jsonplaceholder.typicode.com'
+THE_PATH_TO_USERS = __THE_PATH__ + '/users'	
+THE_PATH_TO_COMMENTS = __THE_PATH__ + '/comments'
+THE_PATH_TO_ALBUMS = __THE_PATH__ + '/albums'
+THE_PATH_TO_PHOTOS = __THE_PATH__ + '/photos'
+THE_PATH_TO_TODOS = __THE_PATH__ + '/todos'
+THE_PATH_TO_POSTS = __THE_PATH__ + '/posts'
