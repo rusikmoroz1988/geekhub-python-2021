@@ -43,7 +43,10 @@ class Calc(object):
         self.last_result = a * b
     
     def division(self, a, b):
-        self.last_result = a / b
+        try: 
+            self.last_result = a / b      
+        except ZeroDivisionError:
+            print("Division not performed. The number b should not be equal to 0!")
 
 
 while True:
@@ -62,10 +65,7 @@ while True:
     print(obj_calc.last_result)
     obj_calc.multiplication(a, b)
     print(obj_calc.last_result)
-    if b == 0:
-        print("Division not performed. The number b should not be equal to 0!")
-    else:
-        obj_calc.division(a, b)
-        print(obj_calc.last_result)
+    obj_calc.division(a, b)
+    print(obj_calc.last_result)
     break
     
