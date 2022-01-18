@@ -27,15 +27,24 @@ class Transaction(object):
     def create_transaction(self):
         self.dm.create_transaction(self.id_user, self.date, self.event)    
 
-class Auth(object):
+class Person(object):
     
     def __init__(self, login, password):
         self.login = login
         self.password = password
     
     def authorization_success(self, dm):
-        return dm.user_exist_in_base(self.login, self.password)
-      
+        return dm.user_exist_in_base(self.login, self.password)    
+    
+    
+    def create_user_(self, collector, id, dm):
+        if collector:
+            return Incassator(dm)
+        else:
+            return User(id, dm)
+        
+
+
 class Banknotes(object):
     
     def __init__(self, cursor):
@@ -135,7 +144,7 @@ class Banknotes(object):
         cursor.execute(sql)
   
     
-class User(object):
+class User(Person):
     
     def __init__(self, id, dm):
         self.id = id
@@ -169,7 +178,7 @@ class User(object):
     
     
 
-class Incassator(object):
+class Incassator(Person):
     
     def __init__(self, dm):
         self.str_choice_coll = ('Enter 1 for look at the obvious banknote\n'
@@ -178,7 +187,7 @@ class Incassator(object):
         self.dm = dm
         self.banknote = Banknotes(self.dm.get_cursor())
     
-    def actions_of_incassator(self):
+    def actions_of_user(self):
         while True:
             choice = input(self.str_choice_coll)
             if choice == '1':
@@ -337,32 +346,35 @@ class DatabaseManagement(object):
 
 class Bankomate(object):
     
-    def __init__(self, dm, privat_bank):
-        self.dm = dm    
+    def __init__(self):
+        self.dm = DatabaseManagement()
+        self.dm.create_tables()
+        self.privat_bank = PrivatBank()  
         self.str_choice= ('Enter 1 for authorization\n'
                     'Enter 2 for registration\n'
                     'Enter 3 for current exchange rate\n'
                     'Enter 4 to exit : ')
-        self.privat_bank = privat_bank
     
     def actions_of_bankomate(self):
         
         while True:        
             choice = input(self.str_choice)
             if choice == '1' or choice == '2':
+                is_collector = input('The user is the collector (1-yes, 0 - no): ')=='1'
                 username = input('Enter username: ')
                 password = input('Enter password: ')
-                id = Auth(username, password).authorization_success(data_base)
+                person = Person(username, password)
+                id = person.authorization_success(self.dm)
                 if (choice == '1') and (id == -1):
                      print('There is no user with such data.')
                      continue
                 
+                object_user = person.create_user_(is_collector, id, self.dm)
                 Transaction(self.dm, id, datetime.datetime.now().strftime("%d-%m-%Y %H:%M"), "Login successfully completed!").create_transaction()
                 if choice == '2':
                     if id!=-1:
                         print('A user with such data already exists!')
-                        continue   
-                    is_collector = input('The user is the collector (1-yes, 0 - no): ')=='1'
+                        continue 
                     self.dm.add_user_to_base(username, password)
                     id = self.dm.user_exist_in_base(username, password)
                     Transaction(self.dm, id, datetime.datetime.now().strftime("%d-%m-%Y %H:%M"), 'A new user has been created').create_transaction()
@@ -381,21 +393,8 @@ class Bankomate(object):
                 print("There is no such option!")
                 continue
             
-            if is_collector:
-                collector = Incassator(self.dm)
-                collector.actions_of_incassator()
-            else:
-                user = User(id, self.dm)
-                user.actions_of_user()
-        
-    
-data_base = DatabaseManagement()
-data_base.create_tables()
-
-new_bankomate = Bankomate(data_base, PrivatBank())
-new_bankomate.actions_of_bankomate()
-    
-data_base.commit_changes()
-data_base.close_connection()
+            object_user.actions_of_user()
+        self.dm.commit_changes()
+        self.dm.close_connection()
 
 
