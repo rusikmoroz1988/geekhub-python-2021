@@ -397,4 +397,5 @@ class Bankomate(object):
         self.dm.commit_changes()
         self.dm.close_connection()
 
+Bankomate().actions_of_bankomate()
 
